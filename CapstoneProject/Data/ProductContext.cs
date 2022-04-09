@@ -16,10 +16,17 @@ namespace CapstoneProject.Data
         }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<Boot> Boots { get; set; }
+        public DbSet<Coat> Coats { get; set; }
+        public DbSet<Snowboard> Snowboards { get; set; }
+        public DbSet<Helmet> Helmets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>().ToTable("Boots");
+            modelBuilder.Entity<Boot>().ToTable("Boots");
+            modelBuilder.Entity<Coat>().ToTable("Coats");
+            modelBuilder.Entity<Snowboard>().ToTable("Snowboards");
+            modelBuilder.Entity<Helmet>().ToTable("Helmets");
         }
     }
 }

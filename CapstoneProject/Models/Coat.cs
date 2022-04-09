@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CapstoneProject.Models
 {
-    public class Product
+    public class Coat
     {
         [Key]
         public int Id { get; set; }
