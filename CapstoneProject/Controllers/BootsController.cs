@@ -54,14 +54,23 @@ namespace CapstoneProject.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,TypeId,Brand,Description,Size")] Boot boot)
+        public async Task<IActionResult> Create(
+            [Bind("TypeId,Brand,Description,Size")] Boot boot)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(boot);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(boot);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "Unable to save changes. " + "see your system administrator.");
+            }
+
             return View(boot);
         }
 
@@ -86,38 +95,35 @@ namespace CapstoneProject.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TypeId,Brand,Description,Size")] Boot boot)
+        public async Task<IActionResult> EditPost(int? id)
         {
-            if (id != boot.Id)
+            if (id == null)
             {
                 return NotFound();
             }
-
-            if (ModelState.IsValid)
+            var bootToUpdate = await _context.Boots.FirstOrDefaultAsync(s => s.Id == id);
+            if (await TryUpdateModelAsync<Boot>(
+                bootToUpdate,
+                "",
+                s => s.Brand, s => s.Description, s => s.Size))
             {
                 try
                 {
-                    _context.Update(boot);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BootExists(boot.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.");
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(boot);
+            return View(bootToUpdate);
         }
 
         // GET: Boots/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
@@ -125,12 +131,18 @@ namespace CapstoneProject.Controllers
             }
 
             var boot = await _context.Boots
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (boot == null)
             {
                 return NotFound();
             }
-
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewData["ErrorMessage"] =
+                    "Delete failed. Try again, and if the problem persists " +
+                    "see your system administrator.";
+            }
             return View(boot);
         }
 
@@ -140,14 +152,20 @@ namespace CapstoneProject.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var boot = await _context.Boots.FindAsync(id);
-            _context.Boots.Remove(boot);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool BootExists(int id)
-        {
-            return _context.Boots.Any(e => e.Id == id);
+            if (boot == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            try
+            {
+                _context.Boots.Remove(boot);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException)
+            {
+                return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
+            }
         }
     }
 }

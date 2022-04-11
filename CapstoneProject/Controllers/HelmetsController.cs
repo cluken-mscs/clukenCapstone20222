@@ -54,13 +54,20 @@ namespace CapstoneProject.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,TypeId,Brand,Description,Size")] Helmet helmet)
+        public async Task<IActionResult> Create([Bind("TypeId,Brand,Description,Size")] Helmet helmet)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(helmet);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(helmet);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "Unable to save changes. " + "see your system administrator.");
             }
             return View(helmet);
         }
@@ -86,34 +93,31 @@ namespace CapstoneProject.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TypeId,Brand,Description,Size")] Helmet helmet)
+        public async Task<IActionResult> EditPost(int? id)
         {
-            if (id != helmet.Id)
+            if (id == null)
             {
                 return NotFound();
             }
-
-            if (ModelState.IsValid)
+            var helmetToUpdate = await _context.Helmets.FirstOrDefaultAsync(s => s.Id == id);
+            if (await TryUpdateModelAsync<Helmet>(
+                helmetToUpdate,
+                "",
+                s => s.Brand, s => s.Description, s => s.Size))
             {
                 try
                 {
-                    _context.Update(helmet);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!HelmetExists(helmet.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ModelState.AddModelError("", "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.");
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(helmet);
+            return View(helmetToUpdate);
         }
 
         // GET: Helmets/Delete/5
@@ -140,14 +144,20 @@ namespace CapstoneProject.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var helmet = await _context.Helmets.FindAsync(id);
-            _context.Helmets.Remove(helmet);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool HelmetExists(int id)
-        {
-            return _context.Helmets.Any(e => e.Id == id);
+            if (helmet == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            try
+            {
+                _context.Helmets.Remove(helmet);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException)
+            {
+                return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
+            }
         }
     }
 }
