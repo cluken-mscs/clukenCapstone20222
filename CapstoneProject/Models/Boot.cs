@@ -14,5 +14,7 @@ namespace CapstoneProject.Models
         public string Brand { get; set; }
         public string Description { get; set; }
         public string Size { get; set; }
+
+        public ICollection<Boot> Boots { get; set; }
     }
 }

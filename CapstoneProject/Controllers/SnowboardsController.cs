@@ -20,9 +20,45 @@ namespace CapstoneProject.Controllers
         }
 
         // GET: Snowboards
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString, string currentFilter, int? pageNumber)
         {
-            return View(await _context.Snowboards.ToListAsync());
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["BrandSortParm"] = String.IsNullOrEmpty(sortOrder) ? "brand_desc" : "";
+            ViewData["DescSortParm"] = sortOrder == "Description" ? "desc_desc" : "Description";
+            ViewData["CurrentFilter"] = searchString;
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+            var snowboards = from s in _context.Snowboards
+                        select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                snowboards = snowboards.Where(s => s.Description.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "brand_desc":
+                    snowboards = snowboards.OrderByDescending(s => s.Brand);
+                    break;
+                case "Description":
+                    snowboards = snowboards.OrderBy(s => s.Description);
+                    break;
+                case "desc_desc":
+                    snowboards = snowboards.OrderByDescending(s => s.Description);
+                    break;
+                default:
+                    snowboards = snowboards.OrderBy(s => s.Brand);
+                    break;
+            }
+            int pageSize = 3;
+            return View(await PaginatedList<Snowboard>.CreateAsync(snowboards.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: Snowboards/Details/5

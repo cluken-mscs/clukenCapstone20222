@@ -20,9 +20,45 @@ namespace CapstoneProject.Controllers
         }
 
         // GET: Boots
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString, string currentFilter, int? pageNumber)
         {
-            return View(await _context.Boots.ToListAsync());
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["BrandSortParm"] = String.IsNullOrEmpty(sortOrder) ? "brand_desc" : "";
+            ViewData["DescSortParm"] = sortOrder == "Description" ? "desc_desc" : "Description";
+            ViewData["CurrentFilter"] = searchString;
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+            var boots = from b in _context.Boots
+                           select b;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                boots = boots.Where(b => b.Description.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "brand_desc":
+                    boots = boots.OrderByDescending(b => b.Brand);
+                    break;
+                case "Description":
+                    boots = boots.OrderBy(b => b.Description);
+                    break;
+                case "desc_desc":
+                    boots = boots.OrderByDescending(b => b.Description);
+                    break;
+                default:
+                    boots = boots.OrderBy(b => b.Brand);
+                    break;
+            }
+            int pageSize = 3;
+            return View(await PaginatedList<Boot>.CreateAsync(boots.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: Boots/Details/5

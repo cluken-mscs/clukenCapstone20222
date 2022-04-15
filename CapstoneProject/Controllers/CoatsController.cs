@@ -20,9 +20,45 @@ namespace CapstoneProject.Controllers
         }
 
         // GET: Coats
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString, string currentFilter, int? pageNumber)
         {
-            return View(await _context.Coats.ToListAsync());
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["BrandSortParm"] = String.IsNullOrEmpty(sortOrder) ? "brand_desc" : "";
+            ViewData["DescSortParm"] = sortOrder == "Description" ? "desc_desc" : "Description";
+            ViewData["CurrentFilter"] = searchString;
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+            var coats = from b in _context.Coats
+                        select b;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                coats = coats.Where(c => c.Description.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "brand_desc":
+                    coats = coats.OrderByDescending(c => c.Brand);
+                    break;
+                case "Description":
+                    coats = coats.OrderBy(c => c.Description);
+                    break;
+                case "desc_desc":
+                    coats = coats.OrderByDescending(c => c.Description);
+                    break;
+                default:
+                    coats = coats.OrderBy(c => c.Brand);
+                    break;
+            }
+            int pageSize = 3;
+            return View(await PaginatedList<Coat>.CreateAsync(coats.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: Coats/Details/5
@@ -100,37 +136,37 @@ namespace CapstoneProject.Controllers
         // POST: Coats/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,TypeId,Brand,Description,Size")] Coat coat)
-        {
-            if (id != coat.Id)
-            {
-                return NotFound();
-            }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Edit(int id, [Bind("Id,TypeId,Brand,Description,Size")] Coat coat)
+        //{
+        //    if (id != coat.Id)
+        //    {
+        //        return NotFound();
+        //    }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(coat);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CoatExists(coat.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(coat);
-        }
+        //    if (ModelState.IsValid)
+        //    {
+        //        try
+        //        {
+        //            _context.Update(coat);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            if (!CoatExists(coat.Id))
+        //            {
+        //                return NotFound();
+        //            }
+        //            else
+        //            {
+        //                throw;
+        //            }
+        //        }
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(coat);
+        //}
 
         // GET: Coats/Delete/5
         public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
