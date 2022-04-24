@@ -18,6 +18,10 @@ a {
   border-color: #1861ac;
 }
 
+a.btn.btn-default {
+    background-color: powderblue;
+}
+
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
   color: #fff;
   background-color: #1b6ec2;
@@ -33,6 +37,12 @@ html {
   html {
     font-size: 16px;
   }
+}
+td {
+    font-weight: normal;
+}
+.bootBrand {
+    font-weight: bold;
 }
 
 .border-top {
@@ -61,8 +71,7 @@ html {
 body {
     /* Margin bottom by footer height */
     margin-bottom: 60px;
-    background-image: url("colbrewBoard.png");
-    background-color: #cccccc;
+    background-color: darkgrey;
 }
 .footer {
   position: absolute;
@@ -70,4 +79,8 @@ body {
   width: 100%;
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
+}
+
+input.btn.btn-default {
+    background-color:powderblue;
 }
