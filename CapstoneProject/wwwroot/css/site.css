@@ -9,7 +9,7 @@ a.navbar-brand {
 
 /* Provide sufficient contrast against white background */
 a {
-  color: #0366d6;
+  color: powderblue;
 }
 
 .btn-primary {
@@ -19,7 +19,8 @@ a {
 }
 
 a.btn.btn-default {
-    background-color: powderblue;
+    background-color: grey;
+    color: white;
 }
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
@@ -83,4 +84,51 @@ body {
 
 input.btn.btn-default {
     background-color:powderblue;
+}
+
+#HomepageBody {
+    background-image: url("/Images/homeBG.jpg");
+    background-repeat:no-repeat;
+    background-position:center;
+    margin: 0;
+    color: white;
+}
+#snowboardBG {
+    background-image: url("/Images/snowboardBG.png");
+    background-repeat: repeat;
+    background-position: center;
+    margin: 0;
+}
+#coatBG {
+    background-image: url("/Images/coatBG4.png");
+    background-repeat: repeat;
+    background-position: center;
+    margin: 0;
+}
+#helmetBG {
+    background-image: url("/Images/helmetBG.png");
+    background-repeat: repeat;
+    background-position: center;
+    margin: 0;
+}
+#footerStyle {
+    color: white;
+}
+#innerBody {
+    background-color: grey;
+    border-radius: 25px;
+    padding-left: 50px;
+}
+#bootsBG {
+    background-image: url("/Images/bootsBG.png");
+    background-repeat: repeat;
+    background-position: center;
+    margin: 0;
+}
+.col-md-4 {
+    background-color: darkgray;
+}
+
+.jumbotron {
+    background-color: darkgray;
 }

@@ -13,6 +13,7 @@ namespace CapstoneProject2.Models
         public string Brand { get; set; }
         public string Description { get; set; }
         public string Size { get; set; }
+        //public string Color { get; set; }
 
         public ICollection<ProductType> ProductTypes { get; set; }
     }
